@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <!-- Rounded rectangle background utilizing the signature Olive color (#5A5A40) -->
+  <rect width="128" height="128" rx="36" fill="#5A5A40" />
+  
+  <!-- Subtle inner ambient accent border to give a premium feel -->
+  <rect x="6" y="6" width="116" height="116" rx="30" stroke="#FAF8F2" stroke-width="2" stroke-opacity="0.12" />
+
+  <!-- The "Human" element: Elegant head rising dynamically from the book -->
+  <circle cx="64" cy="40" r="11" fill="#FAF8F2" />
+
+  <!-- The "Library" element: Open book acting as the shoulders of the human figure -->
+  <!-- Left Page / Left Shoulder -->
+  <path d="M64 56 C54 56 41 62 35 73 C31 81 33 88 43 88 C53 88 59 81 64 76" 
+        stroke="#FAF8F2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Right Page / Right Shoulder -->
+  <path d="M64 56 C74 56 87 62 93 73 C97 81 95 88 85 88 C75 88 69 81 64 76" 
+        stroke="#FAF8F2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Subtle bookmark/spine indicator aligning the book and torso structure -->
+  <line x1="64" y1="76" x2="64" y2="94" stroke="#FAF8F2" stroke-width="7" stroke-linecap="round" />
+</svg>

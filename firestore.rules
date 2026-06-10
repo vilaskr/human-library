@@ -1,0 +1,148 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default catch-all deny rule
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Auth helpers
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // Admin check: Bootstrap vilaskr762@gmail.com and verify through explicit database lookups
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == "vilaskr762@gmail.com" 
+        || (exists(/databases/$(database)/documents/roles/$(request.auth.uid)) 
+            && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == "admin")
+      );
+    }
+
+    // Moderator check: Admins are also moderators
+    function isModerator() {
+      return isAuthenticated() && (
+        isAdmin() 
+        || (exists(/databases/$(database)/documents/roles/$(request.auth.uid)) 
+            && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == "moderator")
+      );
+    }
+
+      // 1. User biography profiles
+    match /users/{uid} {
+      // Allowed to retrieve a single profile
+      allow get: if resource == null 
+        || (resource.data.isDraft == false && resource.data.moderationStatus == 'approved')
+        || isOwner(uid) 
+        || isModerator();
+
+      // Allowed to query/list profiles if approved and public, or if caller is a moderator/admin
+      allow list: if (resource.data.isDraft == false && resource.data.moderationStatus == 'approved')
+        || isModerator();
+
+      // Only the authenticated owner can create their profile doc
+      allow create: if isOwner(uid) 
+        && request.resource.data.uid == uid;
+
+      // Only owner can update details, but cannot auto-approve their status.
+      // Other visitors can lock updates except incrementing views/searchAppearances.
+      allow update: if isOwner(uid) && (
+          // Block self-approval: owner can submit as pending or keep status unchanged
+          !('moderationStatus' in request.resource.data) 
+          || request.resource.data.moderationStatus == 'pending' 
+          || request.resource.data.moderationStatus == resource.data.moderationStatus
+        )
+        || isModerator()
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'searchAppearances']));
+
+      // Deletions allowed by owner or moderator/admin
+      allow delete: if isOwner(uid) || isModerator();
+    }
+
+    // 2. Questions / advisory inquiries
+    match /questions/{id} {
+      // Accessible if public, or if owner/recipient/asker, or if moderator
+      allow read: if resource == null
+        || resource.data.visibility == 'public'
+        || (isAuthenticated() && (
+            request.auth.uid == resource.data.askerId 
+            || request.auth.uid == resource.data.profileOwnerId
+            || isModerator()
+           ));
+
+      // Anyone can ask a question if destination profile exists
+      allow create: if request.resource.data.profileOwnerId != null
+        && (
+          request.resource.data.askerId == 'anonymous'
+          || (isAuthenticated() && request.resource.data.askerId == request.auth.uid)
+        );
+
+      // Thread updates / answering / deletion
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.profileOwnerId 
+        || request.auth.uid == resource.data.askerId 
+        || isModerator()
+      );
+    }
+
+    // 3. Bookmarks security
+    match /bookmarks/{bookmarkId} {
+      allow read: if isAuthenticated() 
+        && (resource == null || request.auth.uid == resource.data.userId);
+
+      allow create: if isAuthenticated() 
+        && request.auth.uid == request.resource.data.userId;
+
+      allow delete: if isAuthenticated() 
+        && request.auth.uid == resource.data.userId;
+    }
+
+    // 4. Role registry rules
+    match /roles/{userId} {
+      // Anyone authenticated can look up private role or moderators/admins can see all
+      allow read: if isOwner(userId) || isModerator();
+
+      // Allow users to volunteer/initialize themselves as user role
+      allow create: if isOwner(userId) && request.resource.data.role == 'user';
+
+      // Updates or elevations are restricted to admins only
+      allow update, delete: if isAdmin();
+    }
+
+    // 5. Abuse reports rules
+    match /reports/{reportId} {
+      allow read: if isModerator();
+      
+      // Let any signed-in user file an abuse report
+      allow create: if isAuthenticated() && request.resource.data.reporterId == request.auth.uid;
+      
+      // Moderators can review, resolve, or dismiss reports
+      allow update: if isModerator();
+      
+      allow delete: if isAdmin();
+    }
+
+    // 6. User system notifications rules
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      
+      // Dispatched by systems, moderators, admins, or self-triggering
+      allow create: if isModerator() 
+        || (isAuthenticated() && request.resource.data.userId == request.auth.uid);
+      
+      // Users can mark notifications as read
+      allow update: if isAuthenticated() 
+        && request.auth.uid == resource.data.userId 
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        
+      allow delete: if isAuthenticated() 
+        && (request.auth.uid == resource.data.userId || isModerator());
+    }
+  }
+}

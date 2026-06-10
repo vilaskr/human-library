@@ -1,0 +1,148 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile Document",
+      "description": "Represents biographical logs, career trajectories, and trade expertise reflections curated by certified human professionals.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique user authentication identifier." },
+        "name": { "type": "string", "description": "Display name of the human professional." },
+        "email": { "type": "string", "format": "email", "description": "Verified registrar email." },
+        "photoURL": { "type": "string", "description": "Secure reference URL for the portrait photograph." },
+        "profession": { "type": "string", "description": "The trade specialty or active career description." },
+        "industry": { "type": "string", "description": "Global economic sector registration tag." },
+        "location": { "type": "string", "description": "Geographical region or base locality." },
+        "bio": { "type": "string", "description": "Short introductory synopsis summarizing life path." },
+        "story": { "type": "string", "description": "Exhaustive reflective narrative detailing career pivots, struggles, and values." },
+        "dailyLife": { "type": "string", "description": "Reflective routine, schedule chronology, or daily structure." },
+        "lessonsLearned": { "type": "string", "description": "Synthesized experience guidelines and fundamental lessons." },
+        "expertiseTags": {
+          "type": "array",
+          "description": "Highly structured concept indices and specialty tags."
+        },
+        "experienceTags": {
+          "type": "array",
+          "description": "Decisive life milestones, failures, and inflection points."
+        },
+        "projects": {
+          "type": "array",
+          "description": "Portfolios, collaborative cooperatives, and initiative URLs."
+        },
+        "socialLinks": {
+          "type": "object",
+          "description": "Secure verified anchors to personal directories, GitHub, and professional networks."
+        },
+        "availability": {
+          "type": "object",
+          "description": "Signals and bandwidth limits set for mentoring, collaboration, or receiving queries."
+        },
+        "yearsOfExperience": { "type": "integer", "description": "Total number of years active in the specified trade." },
+        "featured": { "type": "boolean", "description": "Curation flag highlighting prominent biographies." },
+        "views": { "type": "integer", "description": "Read volumes logged by active search queries." },
+        "searchAppearances": { "type": "integer", "description": "Global directory match occurrences." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of catalog registration." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of biographical revisions." },
+        "isDraft": { "type": "boolean", "description": "State flag representing private drafting status." },
+        "moderationStatus": { "type": "string", "enum": ["pending", "approved", "rejected"], "description": "Current status in the content moderation queue." }
+      },
+      "required": ["uid", "name", "email", "photoURL", "profession", "industry", "location", "bio", "story", "expertiseTags", "experienceTags", "availability", "yearsOfExperience", "featured", "views", "searchAppearances", "createdAt", "isDraft"]
+    },
+    "Question": {
+      "title": "Advisory Inquiry Document",
+      "description": "Represents an advisory text question asked by directory visitors requesting career advice.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unified text question document identifier." },
+        "profileOwnerId": { "type": "string", "description": "Target professional ID receiving the inquiry." },
+        "askerId": { "type": "string", "description": "The unique sender ID or 'anonymous' identifier." },
+        "askerName": { "type": "string", "description": "Sender signature displayed on answers boards." },
+        "question": { "type": "string", "description": "Core descriptive text inquiry composed by visitor." },
+        "answer": { "type": "string", "description": "Thoughtful written response back-logged by the targeted professional." },
+        "visibility": { "type": "string", "enum": ["public", "private"], "description": "Indicates whether the inquiry can be exhibited on public boards." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of inquiry submission." },
+        "moderationStatus": { "type": "string", "enum": ["pending", "approved", "rejected"], "description": "Inquiry moderation state." }
+      },
+      "required": ["id", "profileOwnerId", "askerId", "askerName", "question", "visibility", "createdAt"]
+    },
+    "Bookmark": {
+      "title": "Library Bookmark Registration",
+      "description": "An identifier mapping representing a saved book reference in a user's library.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Active user ID bookmark is registered under." },
+        "profileId": { "type": "string", "description": "Reference biographical profile document target." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of bookmark creation." }
+      },
+      "required": ["userId", "profileId", "createdAt"]
+    },
+    "Role": {
+      "title": "User Authorization Role",
+      "description": "Provides system permission tiers ('admin', 'moderator', 'user') assigned to verified human library cards.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The unique user authentication identifier." },
+        "email": { "type": "string", "format": "email", "description": "Verified email address of the credential holder." },
+        "role": { "type": "string", "enum": ["admin", "moderator", "user"], "description": "Authorization privilege assigned." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of role modification." }
+      },
+      "required": ["userId", "email", "role", "updatedAt"]
+    },
+    "Report": {
+      "title": "Content Abuse Report",
+      "description": "System report filed by users regarding profiles or questions containing unvetted/abusive content.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unified report document identifier." },
+        "reporterId": { "type": "string", "description": "The unique user UID filing the report." },
+        "itemType": { "type": "string", "enum": ["profile", "question"], "description": "Categorization of reported resource." },
+        "itemId": { "type": "string", "description": "Reference identifier of the targeted resource." },
+        "itemTitle": { "type": "string", "description": "Name or identifier representing the reported entity." },
+        "reason": { "type": "string", "description": "Statement detailing content guidelines violation." },
+        "status": { "type": "string", "enum": ["pending", "resolved", "dismissed"], "description": "Current processing state." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of report creation." }
+      },
+      "required": ["id", "reporterId", "itemType", "itemId", "itemTitle", "reason", "status", "createdAt"]
+    },
+    "Notification": {
+      "title": "System Alert Notification",
+      "description": "System notification dispatched to key users concerning account updates or moderation decisions.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unified alert document identifier." },
+        "userId": { "type": "string", "description": "Recipient card UID." },
+        "title": { "type": "string", "description": "High-level summary theme." },
+        "message": { "type": "string", "description": "Detailed explanation of the moderation decision." },
+        "type": { "type": "string", "enum": ["approved", "rejected", "reported", "role_assigned"], "description": "Notification category classification." },
+        "read": { "type": "boolean", "description": "Read receipt status flag." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of notification delivery." }
+      },
+      "required": ["id", "userId", "title", "message", "type", "read", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{uid}": {
+      "schema": "User",
+      "description": "Stores professional biography indices mapping to their verified credential IDs."
+    },
+    "questions/{id}": {
+      "schema": "Question",
+      "description": "Hosts direct advisory logs, text queries, and target responds."
+    },
+    "bookmarks/{id}": {
+      "schema": "Bookmark",
+      "description": "Aggregates personal catalog selections and library entries."
+    },
+    "roles/{userId}": {
+      "schema": "Role",
+      "description": "System permission levels assigned to user credentials, regulating access to mod panels."
+    },
+    "reports/{reportId}": {
+      "schema": "Report",
+      "description": "Hosts profile and advisory questions filed for review."
+    },
+    "notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Dispatches decision alert summaries to users."
+    }
+  }
+}

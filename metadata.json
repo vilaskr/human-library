@@ -1,0 +1,6 @@
+{
+  "name": "Human Library",
+  "description": "An interactive catalog of real-life biographies, trade reflections, and wisdom from people around the world.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

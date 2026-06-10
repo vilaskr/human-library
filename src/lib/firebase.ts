@@ -43,7 +43,9 @@ if (
 ) {
   try {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-    db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+    db = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)'
+      ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
+      : getFirestore(app);
     auth = getAuth(app);
     isRealFirebase = true;
   } catch (error) {
@@ -82,8 +84,11 @@ if (isRealFirebase && db) {
     try {
       await getDocFromServer(doc(db, '_test_connection_', 'ping'));
     } catch (error: any) {
+      // Log connection warnings as info/warn rather than console.error to keep the dev server healthy
       if (error && error.message && error.message.includes('the client is offline')) {
-        console.error('Please check your Firebase configuration or network status.');
+        console.warn('Firebase background check: Device/client appears to be offline or can not reach Firestore: ' + error.message);
+      } else {
+        console.log('Firebase background check completed (or blocked by rules as expected):', error?.message || error);
       }
     }
   };

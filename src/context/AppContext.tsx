@@ -21,7 +21,8 @@ import {
 } from '../lib/storage';
 import { 
   isFirebaseAvailable, 
-  auth as firebaseAuth 
+  auth as firebaseAuth,
+  db as firebaseDb
 } from '../lib/firebase';
 import { 
   signInWithPopup, 
@@ -29,6 +30,7 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged
 } from 'firebase/auth';
+import { doc, getDocFromServer } from 'firebase/firestore';
 
 export type RouteType = 'home' | 'search' | 'human' | 'dashboard' | 'editor' | 'moderation';
 
@@ -84,6 +86,7 @@ interface AppContextType {
 
   // Notifications or State flags
   firebaseStatus: 'connected' | 'sandbox';
+  isDbMissing: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -106,6 +109,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [user, setUser] = useState<UserSession | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [firebaseStatus, setFirebaseStatus] = useState<'connected' | 'sandbox'>('sandbox');
+  const [isDbMissing, setIsDbMissing] = useState(false);
 
   // Core Data
   const [profiles, setProfiles] = useState<HumanProfile[]>([]);
@@ -187,6 +191,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (isFirebaseAvailable && firebaseAuth) {
       setFirebaseStatus('connected');
+
+      // Test if database has been created in the custom project
+      if (firebaseDb) {
+        getDocFromServer(doc(firebaseDb, '_test_connection_', 'ping'))
+          .then(() => {
+            setIsDbMissing(false);
+          })
+          .catch((error: any) => {
+            const errMsg = error?.message || String(error);
+            if (errMsg.toLowerCase().includes('database') && errMsg.toLowerCase().includes('not found')) {
+              setIsDbMissing(true);
+              console.warn('Firestore database does not exist or has not been initialized yet:', error);
+            }
+          });
+      }
+
       const unsubscribe = onAuthStateChanged(firebaseAuth, async (fbUser) => {
         if (fbUser) {
           const userSession: UserSession = {
@@ -408,7 +428,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         sendNotif,
         submitReport,
         changeUserRole,
-        firebaseStatus
+        firebaseStatus,
+        isDbMissing
       }}
     >
       {children}

@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 
 const DynamicViewRouter: React.FC = () => {
-  const { route, refreshProfiles, navigateTo } = useApp();
+  const { route, refreshProfiles, navigateTo, isDbMissing } = useApp();
   const [showBackOption, setShowBackOption] = React.useState(false);
 
   React.useEffect(() => {
@@ -104,6 +104,32 @@ const DynamicViewRouter: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen" id="main-route-container">
       <Navbar />
+      {isDbMissing && (
+        <div className="bg-amber-500/10 border-y border-amber-500/25 text-amber-800 dark:text-amber-200 px-4 py-3 text-sm" id="firestore-missing-alert-banner">
+          <div className="max-w-7xl mx-auto flex items-start gap-3">
+            <div className="shrink-0 p-0.5 text-amber-600 dark:text-amber-400">
+              <svg className="w-5 h-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-semibold text-amber-950 dark:text-amber-100 flex items-center gap-1.5 leading-snug">
+                Cloud Firestore Database is not active in your Firebase project "gen-lang-client-0946504348"
+              </h4>
+              <p className="mt-1 text-xs opacity-90 leading-relaxed max-w-4xl">
+                The application is running in <strong className="font-semibold text-amber-900 dark:text-amber-100">Local Sandbox Mode</strong> using local storage. 
+                Your Google Sign-In will work, but you must initialize the database in the Firebase Console to sync real-time Cloud data:
+              </p>
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                <span className="flex items-center gap-1.5"><span className="font-mono bg-amber-500/15 px-1.5 py-0.5 rounded text-[10px]">Step 1</span> Open <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:text-amber-950 dark:hover:text-amber-50">Firebase Console</a></span>
+                <span className="flex items-center gap-1.5"><span className="font-mono bg-amber-500/15 px-1.5 py-0.5 rounded text-[10px]">Step 2</span> Choose <strong className="font-semibold">Gemini Project</strong> (<code>gen-lang-client-0946504348</code>)</span>
+                <span className="flex items-center gap-1.5"><span className="font-mono bg-amber-500/15 px-1.5 py-0.5 rounded text-[10px]">Step 3</span> Click <strong className="font-semibold">Build &rarr; Firestore Database</strong></span>
+                <span className="flex items-center gap-1.5"><span className="font-mono bg-amber-500/15 px-1.5 py-0.5 rounded text-[10px]">Step 4</span> Click <strong className="font-semibold">Create Database</strong> with ID <code className="bg-amber-500/15 px-1 py-0.5 rounded font-mono">(default)</code></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <main className="flex-1">
         <AnimatePresence mode="wait">
           <motion.div
